@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Executable test cases for the Swag Labs (Sauce Demo) web application.">
+  <title>Swag Labs | Test Cases</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202a32;
+      --muted: #596a73;
+      --paper: #fffefa;
+      --canvas: #edf2ef;
+      --line: #d7dfdb;
+      --brand: #84272d;
+      --green: #2f6956;
+      --green-pale: #e8f1eb;
+      --gold-pale: #f7f0df;
+      --blue-pale: #edf3f5;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); font: 15px/1.58 Georgia, "Times New Roman", serif; }
+    .document { max-width: 1120px; margin: 32px auto; padding: 48px 60px 64px; background: var(--paper); box-shadow: 0 16px 48px #26352d18; }
+    header { padding-bottom: 24px; border-bottom: 2px solid var(--brand); }
+    .eyebrow { margin: 0 0 10px; color: var(--green); font: 700 11px/1.4 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; color: var(--brand); font: 700 38px/1.15 Georgia, "Times New Roman", serif; }
+    .subtitle { margin: 12px 0 0; color: var(--muted); }
+    h2 { margin: 38px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); color: var(--brand); font: 700 25px/1.2 Georgia, "Times New Roman", serif; scroll-margin-top: 16px; }
+    h3 { margin: 0 0 14px; color: var(--green); font: 700 17px/1.35 Arial, sans-serif; }
+    h4 { margin: 20px 0 8px; font: 700 13px/1.4 Arial, sans-serif; }
+    p { margin: 8px 0 12px; }
+    table { width: 100%; margin: 12px 0 18px; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 9px 10px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #eef3ef; color: #344840; font: 700 11px/1.4 Arial, sans-serif; letter-spacing: .03em; }
+    tbody tr:nth-child(even) { background: #fbfcfa; }
+    .summary { width: auto; min-width: 650px; }
+    .summary td:not(:first-child), .summary th:not(:first-child) { text-align: center; }
+    .module { margin-top: 34px; }
+    .case { margin: 24px 0 30px; padding: 22px 24px; border: 1px solid var(--line); border-top: 3px solid var(--green); break-inside: avoid; }
+    .case h3 { margin-top: 0; }
+    .case ol { margin: 8px 0 12px; padding-left: 24px; }
+    .case ol li { margin: 4px 0; }
+    .case .field-table th { width: 190px; }
+    .priority { white-space: nowrap; font-weight: 700; }
+    .p1 { color: #9c292d; }
+    .p2 { color: #9a6416; }
+    .p3 { color: #315f70; }
+    .note { color: var(--muted); font-size: 13px; }
+    .callout { padding: 14px 17px; border-left: 4px solid #a76e19; background: var(--gold-pale); }
+    .footer { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font: 11px/1.5 Arial, sans-serif; }
+    @media (max-width: 720px) {
+      .document { margin: 0; padding: 28px 18px 42px; }
+      h1 { font-size: 31px; }
+      .case { padding: 17px 14px; }
+      table { display: block; overflow-x: auto; }
+      .case .field-table th { width: 145px; }
+    }
+    @media print {
+      @page { size: A4; margin: 13mm; }
+      body { background: #fff; font-size: 10pt; }
+      .document { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+      .case { break-inside: auto; }
+      .case h3, h2, h4 { break-after: avoid; }
+      table { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <header>
+      <p class="eyebrow">Quality Engineering | Functional Test Suite</p>
+      <h1>Swag Labs (Sauce Demo)<br>Test Cases</h1>
+      <p class="subtitle">Application: Swag Labs · Test URL: <a href="https://www.saucedemo.com">https://www.saucedemo.com</a> · Target browsers: latest Chrome, Firefox, and Edge</p>
+    </header>
+
+    <main>
+      <section aria-labelledby="coverage-heading">
+        <h2 id="coverage-heading">Coverage Summary</h2>
+        <p class="note">Each case is counted once under its primary scenario category. P1 cases appear first within each module.</p>
+        <table class="summary">
+          <thead><tr><th>Module</th><th>Positive</th><th>Negative</th><th>Boundary</th><th>Edge</th><th>Total</th></tr></thead>
+          <tbody id="coverage-rows"></tbody>
+          <tfoot id="coverage-total"></tfoot>
+        </table>
+      </section>
+
+      <div id="test-cases"></div>
+
+      <section aria-labelledby="assumptions-heading">
+        <h2 id="assumptions-heading">Open Questions / Assumptions</h2>
+        <ul>
+          <li>All six supplied usernames use the password <code>secret_sauce</code>. The locked-out account is expected to be denied; the other five accounts are expected to authenticate.</li>
+          <li>Assumed product inventory comprises six products. Exact product names, descriptions, images, sort order, prices, and any variation among known-defect accounts should be confirmed against the live build.</li>
+          <li>Expected cart persistence after a browser refresh and after logout/login is taken from the requested coverage; confirm the intended persistence contract because this is a demo application.</li>
+          <li>Checkout validation messages, maximum field lengths, accepted characters, tax rate/rounding, payment/shipping display values, and exact confirmation copy are not specified. Assert required-field blocking and arithmetic consistency; confirm exact copy and policy with the product owner.</li>
+          <li>SQL injection and XSS inputs are benign, non-destructive test strings. Confirm that the application safely rejects or treats them as data; do not execute payloads against any system outside this authorized test environment.</li>
+          <li>For direct checkout URLs, unauthenticated access and checkout access with an empty cart are expected to be blocked or redirected to a safe page. Confirm the exact destination and message.</li>
+          <li>The About destination and social account URLs are not supplied. Verify intended destination, secure navigation, and new-tab behavior against approved links.</li>
+          <li>Performance-glitch and known-defect user behavior may be intermittent or intentional. Compare each account with standard_user using the same browser, network, and product/action sequence; capture timings and screenshots rather than assuming a specific defect.</li>
+          <li>Responsive behavior should remain usable at the specified viewport widths; exact breakpoint layouts are not specified. Browser/viewport test cases are manual unless an existing automation framework supports those configurations.</li>
+        </ul>
+      </section>
+    </main>
+    <div class="footer">Prepared from the supplied Swag Labs scope. Execution status remains Not Run until a tester records results.</div>
+  </div>
+
+  <script>
+    const modules = [
+      {
+        code: "LOGIN", name: "Login",
+        cases: [
+          ["Log in as standard_user", "Functional", "P1 (Critical)", "Blocker", "Automatable", "Positive",
+            "Verifies a valid standard account reaches the product inventory.",
+            ["Open the login page while logged out."], ["Username: standard_user", "Password: secret_sauce"],
+            [["Enter standard_user in Username.", "The username field displays standard_user."], ["Enter secret_sauce in Password.", "The password field masks the entered value."], ["Select Login.", "The user is redirected to /inventory.html and the inventory page is displayed."]],
+            "standard_user is authenticated and can access the inventory.", "Log out to clear the authenticated session."],
+          ["Block locked_out_user at login", "Negative", "P1 (Critical)", "Critical", "Automatable", "Negative",
+            "Verifies that the explicitly locked account cannot access protected inventory.",
+            ["Open the login page while logged out."], ["Username: locked_out_user", "Password: secret_sauce"],
+            [["Enter locked_out_user in Username.", "The username field displays locked_out_user."], ["Enter secret_sauce in Password.", "The password field masks the entered value."], ["Select Login.", "Login is denied, an error message is displayed, and /inventory.html is not opened."]],
+            "The locked-out account remains unauthenticated and sees a login error.", "Dismiss the error and remain logged out."],
+          ["Log in as problem_user", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies the known-defect account can authenticate so its product behavior can be tested.",
+            ["Open the login page while logged out."], ["Username: problem_user", "Password: secret_sauce"],
+            [["Enter problem_user and secret_sauce in their respective fields.", "Both fields contain the supplied credentials."], ["Select Login.", "The user is redirected to /inventory.html."]],
+            "problem_user is authenticated and the inventory is reachable.", "Log out before another account is used."],
+          ["Log in as performance_glitch_user", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies that the slow-response account eventually reaches inventory and records its response time.",
+            ["Open the login page while logged out; start a timer before submitting credentials."], ["Username: performance_glitch_user", "Password: secret_sauce"],
+            [["Enter performance_glitch_user and secret_sauce.", "The fields contain the supplied credentials."], ["Select Login and record elapsed time until navigation completes.", "The user eventually reaches /inventory.html; elapsed time is recorded without imposing an unspecified threshold."]],
+            "The account authenticates; any unusually slow response is recorded for comparison.", "Log out and retain the timing result."],
+          ["Log in as error_user", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies the account designated for action errors can authenticate.",
+            ["Open the login page while logged out."], ["Username: error_user", "Password: secret_sauce"],
+            [["Enter error_user and secret_sauce.", "The fields contain the supplied credentials."], ["Select Login.", "The user is redirected to /inventory.html."]],
+            "error_user is authenticated and inventory is reachable.", "Log out before another account is used."],
+          ["Log in as visual_user", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies the account designated for visual defects can authenticate.",
+            ["Open the login page while logged out."], ["Username: visual_user", "Password: secret_sauce"],
+            [["Enter visual_user and secret_sauce.", "The fields contain the supplied credentials."], ["Select Login.", "The user is redirected to /inventory.html."]],
+            "visual_user is authenticated and inventory is reachable.", "Log out before another account is used."],
+          ["Reject invalid credentials", "Negative", "P1 (Critical)", "Major", "Automatable", "Negative",
+            "Verifies invalid credentials do not establish an authenticated session.",
+            ["Open the login page while logged out."], ["Username: standard_user", "Password: IncorrectPass123"],
+            [["Enter standard_user and IncorrectPass123.", "The supplied values appear in the username and masked password fields."], ["Select Login.", "Login is denied and a visible error is shown; the URL does not become /inventory.html."]],
+            "Invalid credentials are rejected and protected inventory remains inaccessible.", "Clear the error and remain logged out."],
+          ["Validate both required login fields", "Negative", "P2 (High)", "Major", "Automatable", "Negative",
+            "Verifies submission with both login fields empty is blocked with an observable validation message.",
+            ["Open the login page with both fields empty."], ["Username: empty", "Password: empty"],
+            [["Select Login without entering either value.", "Login is blocked and a required-field error is displayed; no authenticated page opens."]],
+            "Empty credentials do not create a session.", "Remain logged out."],
+          ["Validate missing username", "Negative", "P2 (High)", "Major", "Automatable", "Negative",
+            "Verifies that a password without a username cannot authenticate.",
+            ["Open the login page while logged out."], ["Username: empty", "Password: secret_sauce"],
+            [["Enter secret_sauce in Password.", "The password is masked."], ["Select Login.", "Login is blocked and a username-required error is displayed."]],
+            "The user remains logged out and receives actionable validation.", "Remain logged out."],
+          ["Validate missing password", "Negative", "P2 (High)", "Major", "Automatable", "Negative",
+            "Verifies that a username without a password cannot authenticate.",
+            ["Open the login page while logged out."], ["Username: standard_user", "Password: empty"],
+            [["Enter standard_user in Username.", "The username is displayed."], ["Select Login.", "Login is blocked and a password-required error is displayed."]],
+            "The user remains logged out and receives actionable validation.", "Remain logged out."],
+          ["Dismiss login error with the close button", "UI", "P2 (High)", "Minor", "Automatable", "Edge",
+            "Verifies the login error close (X) control dismisses the error without authenticating.",
+            ["Open the login page while logged out."], ["Username: standard_user", "Password: IncorrectPass123"],
+            [["Submit the invalid credentials.", "A login error and its close (X) control are visible."], ["Select the error close (X) control.", "The error is dismissed and the user remains on the login page."]],
+            "The error can be dismissed without changing authentication state.", "Remain logged out."],
+          ["Block direct inventory access while logged out", "Security", "P1 (Critical)", "Critical", "Automatable", "Negative",
+            "Verifies the protected inventory route cannot be opened without authentication.",
+            ["Ensure the browser has no authenticated session."], ["URL: https://www.saucedemo.com/inventory.html"],
+            [["Navigate directly to /inventory.html.", "The user is redirected to the login page or shown an access-denied state; protected inventory content is not available."]],
+            "Unauthenticated direct access to inventory is blocked.", "Remain logged out."],
+          ["Treat SQL injection strings as login data", "Security", "P1 (Critical)", "Critical", "Automatable", "Edge",
+            "Checks that SQL-like input cannot bypass authentication or cause an unhandled server error.",
+            ["Open the login page while logged out."], ["Username: ' OR '1'='1' --", "Password: secret_sauce"],
+            [["Enter the SQL-like username and supplied password.", "The fields accept the text as input."], ["Select Login.", "Authentication is not bypassed; no inventory session is created and no raw database error or stack trace is exposed."]],
+            "The input is handled safely as data and the user remains unauthenticated.", "Clear the test input."],
+          ["Treat script markup as login data", "Security", "P1 (Critical)", "Critical", "Automatable", "Edge",
+            "Checks that markup entered on login is not executed or rendered as active script.",
+            ["Open the login page while logged out."], ["Username: \x3cscript>alert(1)\x3c/script>", "Password: secret_sauce"],
+            [["Enter the markup string in Username and the supplied password.", "The username field treats the string as text."], ["Select Login.", "No script dialog or executable markup appears; authentication is denied and any error displays the input safely."]],
+            "The test string is not executed and no authenticated session is created.", "Clear the test input."],
+        ]
+      },
+      {
+        code: "INV", name: "Products (Inventory)",
+        cases: [
+          ["Display all six products and their listing data", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies inventory contains the requested six products, each with a name, description, price, and image.",
+            ["Log in as standard_user and open /inventory.html."], ["Expected product count: 6", "Required listing fields: name, description, price, image"],
+            [["Count the product cards.", "Exactly six product cards are displayed."], ["Inspect each product card.", "Every card displays a product name, description, price, image, and its available cart action."]],
+            "All six products and all requested listing fields are present.", "Remain on inventory."],
+          ["Add a product and update cart badge", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies adding one inventory product changes its action and the cart badge count.",
+            ["Log in as standard_user; start with an empty cart."], ["Product: Sauce Labs Backpack"],
+            [["Select Add to cart for Sauce Labs Backpack.", "The button changes to Remove and the cart badge displays 1."], ["Inspect the cart icon.", "The badge count equals the number of items added."]],
+            "The selected product is added and the badge shows one.", "Remove the product or reset app state."],
+          ["Remove a product from inventory", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies the inventory Remove action reverses an add-to-cart operation.",
+            ["Log in as standard_user with an empty cart."], ["Product: Sauce Labs Backpack"],
+            [["Select Add to cart for Sauce Labs Backpack.", "Its action changes to Remove and the cart badge displays 1."], ["Select Remove for Sauce Labs Backpack.", "Its action changes back to Add to cart and the badge is removed or returns to zero."]],
+            "The product is removed and cart count reflects the empty cart.", "Keep cart empty."],
+          ["Sort products by name A–Z", "Functional", "P2 (High)", "Major", "Automatable", "Positive",
+            "Verifies the Name (A to Z) sort option orders all product names alphabetically.",
+            ["Log in as standard_user and open inventory."], ["Sort option: Name (A to Z)"],
+            [["Choose Name (A to Z) from the sort control.", "All six product cards remain present and product names are in ascending alphabetical order."]],
+            "Inventory is sorted by product name ascending.", "Leave sorting as selected."],
+          ["Sort products by name Z–A", "Functional", "P2 (High)", "Major", "Automatable", "Positive",
+            "Verifies the Name (Z to A) sort option orders all product names in reverse alphabetical order.",
+            ["Log in as standard_user and open inventory."], ["Sort option: Name (Z to A)"],
+            [["Choose Name (Z to A) from the sort control.", "All six product cards remain present and product names are in descending alphabetical order."]],
+            "Inventory is sorted by product name descending.", "Leave sorting as selected."],
+          ["Sort products by price low–high", "Functional", "P2 (High)", "Major", "Automatable", "Positive",
+            "Verifies the Price (low to high) option orders all six product prices ascending.",
+            ["Log in as standard_user and open inventory."], ["Sort option: Price (low to high)"],
+            [["Choose Price (low to high) from the sort control.", "All six product cards remain present and their displayed prices are in ascending numeric order."]],
+            "Inventory is sorted by price ascending.", "Leave sorting as selected."],
+          ["Sort products by price high–low", "Functional", "P2 (High)", "Major", "Automatable", "Positive",
+            "Verifies the Price (high to low) option orders all six product prices descending.",
+            ["Log in as standard_user and open inventory."], ["Sort option: Price (high to low)"],
+            [["Choose Price (high to low) from the sort control.", "All six product cards remain present and their displayed prices are in descending numeric order."]],
+            "Inventory is sorted by price descending.", "Leave sorting as selected."],
+          ["Compare problem_user product images with standard_user", "Regression", "P2 (High)", "Major", "Manual only", "Edge",
+            "Compares inventory images for the known-defect account with the same baseline session and records incorrect or mismatched images.",
+            ["Use the same browser and viewport; record standard_user inventory images, then log in as problem_user."], ["Product set: all six inventory products"],
+            [["Capture the six standard_user product images.", "A baseline image is recorded for each product."], ["Capture the six problem_user product images.", "Each product image is compared with the matching standard_user image and any mismatch is recorded with product name and screenshot."]],
+            "Image differences are documented; the comparison does not assume which image is defective.", "Log out and attach screenshots to any defect."],
+          ["Compare error_user inventory actions with standard_user", "Regression", "P2 (High)", "Major", "Automatable", "Edge",
+            "Compares inventory cart actions for error_user against standard_user using the same product and sequence.",
+            ["Run the same add/remove sequence once with each account in the same browser."], ["Product: Sauce Labs Backpack"],
+            [["Add then remove Sauce Labs Backpack as standard_user.", "The action label and cart badge update for each action; record results."], ["Repeat the exact actions as error_user.", "The same observable cart transitions occur, or each difference/error is captured for triage."]],
+            "The result provides a direct account-to-account behavior comparison.", "Log out and reset cart state between account runs."],
+          ["Compare visual_user inventory layout with standard_user", "UI", "P2 (High)", "Major", "Manual only", "Edge",
+            "Compares inventory layout and visible product content for visual_user against the standard_user baseline.",
+            ["Use identical browser, viewport, zoom, and scroll position for both accounts."], ["Viewport: 1366px wide", "Products: all six"],
+            [["Capture standard_user inventory.", "The baseline layout and visible text are recorded."], ["Capture visual_user inventory.", "Compare alignment, overlap, clipping, and visible product content; record differences with screenshots."]],
+            "Visual differences are documented without presuming a specific defect.", "Log out and retain comparison screenshots."],
+          ["Compare performance_glitch_user inventory response with standard_user", "Performance", "P2 (High)", "Major", "Automatable", "Edge",
+            "Compares inventory navigation duration under identical conditions without inventing a response-time threshold.",
+            ["Use the same browser/network and measure from Login selection to inventory fully rendered."], ["Password: secret_sauce", "Accounts: standard_user and performance_glitch_user"],
+            [["Measure standard_user login-to-inventory duration.", "The elapsed duration and completion state are recorded."], ["Measure performance_glitch_user login-to-inventory duration.", "The elapsed duration and completion state are recorded and compared with the baseline."]],
+            "Both outcomes and timings are recorded for comparison; no unstated SLA is applied.", "Log out between account runs."],
+        ]
+      },
+      {
+        code: "PDP", name: "Product Details",
+        cases: [
+          ["Open product details from the product name", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies selecting a product name opens that product's detail page.",
+            ["Log in as standard_user and open inventory."], ["Product: Sauce Labs Backpack"],
+            [["Select the Sauce Labs Backpack name.", "A product detail page opens for Sauce Labs Backpack."]],
+            "Selecting a product name opens its corresponding detail page.", "Return to inventory."],
+          ["Open product details from the product image", "Functional", "P2 (High)", "Major", "Automatable", "Positive",
+            "Verifies selecting a product image opens the matching product detail page.",
+            ["Log in as standard_user and open inventory."], ["Product: Sauce Labs Backpack"],
+            [["Select the Sauce Labs Backpack image.", "A product detail page opens for Sauce Labs Backpack."]],
+            "Selecting the image opens the corresponding product detail page.", "Return to inventory."],
+          ["Match product detail data with inventory listing", "Regression", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies product name, description, price, and image remain consistent between inventory and product detail.",
+            ["Log in as standard_user and open inventory."], ["Product: Sauce Labs Backpack"],
+            [["Record the product listing's name, description, price, and image.", "The listing values are available for comparison."], ["Open the product detail page.", "The detail page shows the same name, description, price, and corresponding image."]],
+            "Product detail information matches the selected inventory listing.", "Return to inventory."],
+          ["Add and remove product from details", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies product detail cart actions update button label and cart badge.",
+            ["Log in as standard_user with an empty cart; open Sauce Labs Backpack details."], ["Product: Sauce Labs Backpack"],
+            [["Select Add to cart.", "The action changes to Remove and the cart badge displays 1."], ["Select Remove.", "The action returns to Add to cart and the badge returns to zero or is removed."]],
+            "Both detail-page cart actions update the cart state consistently.", "Keep cart empty."],
+          ["Return to products from details", "Navigation", "P2 (High)", "Minor", "Automatable", "Positive",
+            "Verifies Back to products returns from product details to inventory.",
+            ["Log in as standard_user and open any product detail page."], ["Product: Sauce Labs Backpack"],
+            [["Select Back to products.", "The inventory page is displayed with its product list."]],
+            "The user returns to inventory.", "Remain on inventory."],
+        ]
+      },
+      {
+        code: "CART", name: "Cart",
+        cases: [
+          ["Review selected items in cart", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies the cart shows each selected product with quantity and price.",
+            ["Log in as standard_user and add two distinct products."], ["Products: Sauce Labs Backpack; Sauce Labs Bike Light"],
+            [["Open the cart.", "The cart displays both selected product names, quantity, and price; each quantity is 1."]],
+            "Cart contents, quantities, and prices match the selected products.", "Remove items or reset app state."],
+          ["Remove an item from cart", "Functional", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies the cart Remove action removes only the selected product and updates the badge.",
+            ["Log in as standard_user and add two distinct products; open cart."], ["Remove: Sauce Labs Backpack", "Keep: Sauce Labs Bike Light"],
+            [["Select Remove for Sauce Labs Backpack.", "Backpack is absent, Bike Light remains, and the badge reflects one item."]],
+            "Only the selected item is removed and the remaining cart state is correct.", "Reset app state."],
+          ["Continue shopping from cart", "Navigation", "P2 (High)", "Minor", "Automatable", "Positive",
+            "Verifies Continue Shopping returns to inventory without losing selected cart items.",
+            ["Log in as standard_user; add Sauce Labs Backpack and open cart."], ["Product: Sauce Labs Backpack"],
+            [["Select Continue Shopping.", "Inventory is displayed and the cart still contains Sauce Labs Backpack."]],
+            "The user returns to inventory with cart contents preserved.", "Reset app state."],
+          ["Proceed from cart to checkout", "Functional", "P1 (Critical)", "Blocker", "Automatable", "Positive",
+            "Verifies Checkout opens the checkout information step for a non-empty cart.",
+            ["Log in as standard_user and add Sauce Labs Backpack."], ["Product: Sauce Labs Backpack"],
+            [["Open the cart.", "The cart contains Sauce Labs Backpack."], ["Select Checkout.", "The checkout Your Information page opens."]],
+            "A non-empty cart can proceed to checkout information.", "Cancel checkout and reset app state."],
+          ["Display empty-cart behavior", "Negative", "P2 (High)", "Major", "Automatable", "Negative",
+            "Verifies the cart handles having no products and does not present an item to check out.",
+            ["Log in as standard_user with an empty cart."], ["Cart items: none"],
+            [["Open the cart.", "The cart has no product rows and the badge is absent or zero."], ["Inspect the checkout control.", "Checkout is unavailable or cannot advance to checkout without an item."]],
+            "An empty cart is represented accurately and cannot start a purchase.", "Remain on cart."],
+          ["Preserve cart after page refresh", "Regression", "P2 (High)", "Major", "Automatable", "Edge",
+            "Checks the requested cart persistence behavior after refreshing the browser.",
+            ["Log in as standard_user and add two distinct products."], ["Products: Sauce Labs Backpack; Sauce Labs Bike Light"],
+            [["Refresh the inventory page.", "The page reloads without an application error."], ["Open the cart.", "Both products, quantities, prices, and cart badge are retained."]],
+            "Cart contents persist across refresh as requested.", "Reset app state; record any persistence failure."],
+          ["Preserve cart after logout and login", "Regression", "P2 (High)", "Major", "Automatable", "Edge",
+            "Checks the requested cart persistence behavior across logout and a subsequent login.",
+            ["Log in as standard_user and add Sauce Labs Backpack."], ["Product: Sauce Labs Backpack"],
+            [["Open the menu and select Logout.", "The login page is displayed and the session is ended."], ["Log in again as standard_user.", "The inventory page is displayed."], ["Open the cart.", "Sauce Labs Backpack remains in the cart if cross-login persistence is the intended contract."]],
+            "The cart state matches the approved cross-login persistence requirement.", "Reset app state; record actual behavior for contract confirmation."],
+        ]
+      },
+      {
+        code: "CHK", name: "Checkout",
+        cases: [
+          ["Complete checkout with valid customer information", "Functional", "P1 (Critical)", "Blocker", "Automatable", "Positive",
+            "Verifies valid required customer information advances from Your Information to Overview.",
+            ["Log in as standard_user and add Sauce Labs Backpack."], ["First Name: Alex", "Last Name: Morgan", "Postal Code: 10001"],
+            [["Open cart and select Checkout.", "Your Information fields are displayed."], ["Enter Alex, Morgan, and 10001 in the corresponding fields.", "Each entered value appears in its field."], ["Select Continue.", "The checkout Overview page opens."]],
+            "Valid customer details advance checkout to Overview.", "Select Cancel on Overview or reset app state."],
+          ["Block checkout when required information is missing", "Negative", "P1 (Critical)", "Major", "Automatable", "Negative",
+            "Verifies the required First Name, Last Name, and Postal Code fields are validated.",
+            ["Log in as standard_user; add an item; open checkout Your Information."], ["First Name: empty", "Last Name: empty", "Postal Code: empty"],
+            [["Select Continue with all fields blank.", "Checkout does not advance and required-field validation is shown."], ["Enter Alex and Morgan but leave Postal Code blank, then select Continue.", "Checkout remains on Your Information and identifies Postal Code as required."], ["Enter Alex and 10001 but leave Last Name blank, then select Continue.", "Checkout remains on Your Information and identifies the missing required value."]],
+            "Checkout cannot advance until all three required fields contain values.", "Cancel checkout and reset app state."],
+          ["Accept supported special characters in customer fields", "Boundary", "P2 (High)", "Major", "Automatable", "Boundary",
+            "Checks handling of special characters in customer information without assuming an unstated character policy.",
+            ["Log in as standard_user; add an item; open checkout Your Information."], ["First Name: Jean-Luc", "Last Name: O'Neil", "Postal Code: A1B 2C3"],
+            [["Enter the supplied values into their matching fields.", "Values are accepted as text or a clear validation message identifies any unsupported field."], ["Select Continue.", "The form either advances with safely preserved values or stays on the form with specific validation; no crash or data corruption occurs."]],
+            "Special-character input is handled safely and consistently with the documented field policy.", "Cancel checkout and reset app state."],
+          ["Handle long checkout field values", "Boundary", "P2 (High)", "Major", "Automatable", "Boundary",
+            "Checks that long strings do not break checkout layout or cause an unhandled error.",
+            ["Log in as standard_user; add an item; open checkout Your Information."], ["First Name: 256 x A", "Last Name: 256 x B", "Postal Code: 256 x 1"],
+            [["Enter the long values in the corresponding fields.", "The fields constrain or accept input without layout breakage."], ["Select Continue.", "The form either gives field-specific length validation or advances safely; no unhandled error occurs."]],
+            "Long values are handled without an application failure; accepted maximums are recorded.", "Cancel checkout and reset app state."],
+          ["Cancel checkout information", "Navigation", "P2 (High)", "Minor", "Automatable", "Positive",
+            "Verifies Cancel on Your Information abandons checkout and returns to inventory.",
+            ["Log in as standard_user; add an item; open Your Information."], ["Product: Sauce Labs Backpack"],
+            [["Select Cancel.", "Inventory is displayed and checkout is not advanced."]],
+            "Cancel exits the information step without completing the purchase.", "Reset app state."],
+          ["Verify checkout overview amounts and arithmetic", "Functional", "P1 (Critical)", "Critical", "Automatable", "Positive",
+            "Verifies item total, tax, and total correspond to the cart and displayed tax calculation.",
+            ["Log in as standard_user; add two products; complete required customer information."], ["Products: Sauce Labs Backpack ($29.99); Sauce Labs Bike Light ($9.99)"],
+            [["Inspect the Overview item list.", "Both selected products, quantities, and individual prices match the cart."], ["Compare Item total with the sum of listed item prices.", "Item total equals the sum of product price multiplied by quantity."], ["Compare Total with Item total plus displayed Tax.", "Displayed Total equals Item total plus displayed Tax using the displayed currency precision."]],
+            "Overview items and displayed monetary calculations are internally consistent.", "Select Cancel or reset app state."],
+          ["Verify payment and shipping information on overview", "UI", "P2 (High)", "Major", "Manual only", "Positive",
+            "Verifies payment and shipping information are visible and populated on checkout Overview.",
+            ["Log in as standard_user; add an item; complete required information to reach Overview."], ["Customer: Alex Morgan", "Postal Code: 10001"],
+            [["Inspect the payment information section.", "A payment information label/value is displayed."], ["Inspect the shipping information section.", "A shipping information label/value is displayed."]],
+            "Payment and shipping information are shown on Overview; actual displayed values are recorded.", "Select Cancel or reset app state."],
+          ["Cancel checkout from overview", "Navigation", "P2 (High)", "Minor", "Automatable", "Positive",
+            "Verifies Cancel on Overview abandons checkout and returns to inventory.",
+            ["Reach Overview with a non-empty cart."], ["Product: Sauce Labs Backpack"],
+            [["Select Cancel.", "Inventory is displayed and checkout is not completed."]],
+            "Cancel exits Overview without placing the order.", "Reset app state."],
+          ["Finish checkout and reach completion page", "Functional", "P1 (Critical)", "Blocker", "Automatable", "Positive",
+            "Verifies Finish submits a valid order and opens the completion page.",
+            ["Reach Overview with valid customer information and at least one product."], ["First Name: Alex", "Last Name: Morgan", "Postal Code: 10001"],
+            [["Select Finish.", "The Checkout: Complete! page opens and a confirmation message is displayed."]],
+            "The order reaches the completion state and confirmation is visible.", "Continue to Back Home or reset app state."],
+          ["Prevent direct checkout access without login or items", "Security", "P1 (Critical)", "Critical", "Automatable", "Negative",
+            "Verifies direct checkout routes do not permit unauthenticated or empty-cart checkout.",
+            ["Run once with no authenticated session; then log in with an empty cart."], ["Routes: /checkout-step-one.html and /checkout-step-two.html"],
+            [["Navigate directly to /checkout-step-one.html while logged out.", "The user is redirected to login or otherwise denied checkout; customer fields are not exposed."], ["Log in with an empty cart and navigate directly to /checkout-step-two.html.", "Overview does not allow an empty purchase; the user is redirected or shown a safe empty-cart state."]],
+            "Authentication and a valid cart are required to access the corresponding checkout steps.", "Remain logged out or empty the cart."],
+          ["Treat script markup as checkout field data", "Security", "P1 (Critical)", "Critical", "Automatable", "Edge",
+            "Checks that script markup in checkout information is not executed or rendered as active content.",
+            ["Log in as standard_user; add an item; open Your Information."], ["First Name: \x3cscript>alert(1)\x3c/script>", "Last Name: Morgan", "Postal Code: 10001"],
+            [["Enter the markup string in First Name and valid values in the other required fields.", "The field treats the string as text."], ["Select Continue.", "No script dialog or executable markup appears; the application either safely validates or displays the text as inert content."]],
+            "The string is not executed and checkout remains safe.", "Cancel checkout and reset app state."],
+        ]
+      },
+      {
+        code: "MENU", name: "Menu",
+        cases: [
+          ["Open All Items from menu", "Navigation", "P1 (Critical)", "Major", "Automatable", "Positive",
+            "Verifies All Items navigation opens the complete inventory.",
+            ["Log in as standard_user and open the burger menu."], ["Menu item: All Items"],
+            [["Select All Items.", "The menu closes and the six-product inventory page is displayed."]],
+            "All Items returns the user to inventory.", "Remain on inventory."],
+          ["Open About from menu", "Navigation", "P2 (High)", "Minor", "Automatable", "Positive",
+            "Verifies the About menu item navigates to its configured destination.",
+            ["Log in as standard_user and open the burger menu."], ["Menu item: About"],
+            [["Select About.", "The browser navigates to the configured Sauce Labs About destination without an application error."]],
+            "About navigation reaches the intended destination.", "Return to the application."],
+          ["Log out from menu", "Security", "P1 (Critical)", "Critical", "Automatable", "Positive",
+            "Verifies Logout ends the authenticated session and returns to login.",
+            ["Log in as standard_user and open the burger menu."], ["Menu item: Logout"],
+            [["Select Logout.", "The login page is displayed."], ["Navigate to /inventory.html directly.", "Protected inventory is denied and the login page or an access-denied state is displayed."]],
+            "Logout ends access to protected inventory.", "Remain logged out."],
+          ["Reset application state from menu", "Functional", "P2 (High)", "Major", "Automatable", "Positive",
+            "Verifies Reset App State clears selected products and restores available cart actions.",
+            ["Log in as standard_user and add two products."], ["Products: Sauce Labs Backpack; Sauce Labs Bike Light"],
+            [["Open the burger menu and select Reset App State.", "The menu action completes without an error."], ["Inspect product actions and cart badge.", "Added products return to Add to cart and the cart badge is absent or zero."]],
+            "Application cart state is reset.", "Leave the app in its reset state."],
+          ["Deny browser Back access after logout", "Security", "P1 (Critical)", "Critical", "Automatable", "Negative",
+            "Verifies browser history does not restore protected inventory after logout.",
+            ["Log in as standard_user, open inventory, then log out using the menu."], ["Protected route: /inventory.html"],
+            [["Use the browser Back button after logout.", "Protected inventory is not usable; the browser shows login or requires a new authenticated session."]],
+            "Browser history does not restore an active authenticated session.", "Remain logged out."],
+        ]
+      },
+      {
+        code: "FOOT", name: "Footer",
+        cases: [
+          ["Open Twitter/X social link in a new tab", "Navigation", "P2 (High)", "Minor", "Manual only", "Positive",
+            "Verifies the Twitter/X footer link opens the configured social destination in a new tab.",
+            ["Log in as standard_user and scroll to the footer."], ["Footer link: Twitter/X"],
+            [["Select the Twitter/X footer link.", "A new browser tab opens at the configured Twitter/X destination and the Sauce Demo tab remains open."]],
+            "The social link opens a new tab at its intended destination.", "Close the social tab."],
+          ["Open Facebook social link in a new tab", "Navigation", "P2 (High)", "Minor", "Manual only", "Positive",
+            "Verifies the Facebook footer link opens the configured social destination in a new tab.",
+            ["Log in as standard_user and scroll to the footer."], ["Footer link: Facebook"],
+            [["Select the Facebook footer link.", "A new browser tab opens at the configured Facebook destination and the Sauce Demo tab remains open."]],
+            "The social link opens a new tab at its intended destination.", "Close the social tab."],
+          ["Open LinkedIn social link in a new tab", "Navigation", "P2 (High)", "Minor", "Manual only", "Positive",
+            "Verifies the LinkedIn footer link opens the configured social destination in a new tab.",
+            ["Log in as standard_user and scroll to the footer."], ["Footer link: LinkedIn"],
+            [["Select the LinkedIn footer link.", "A new browser tab opens at the configured LinkedIn destination and the Sauce Demo tab remains open."]],
+            "The social link opens a new tab at its intended destination.", "Close the social tab."],
+        ]
+      },
+      {
+        code: "E2E", name: "End-to-End, Accessibility, and Responsive",
+        cases: [
+          ["Complete purchase and logout end to end", "Regression", "P1 (Critical)", "Blocker", "Automatable", "Positive",
+            "Exercises the core purchase lifecycle from login through logout.",
+            ["Start logged out with an empty cart."], ["Username: standard_user", "Password: secret_sauce", "Products: Sauce Labs Backpack; Sauce Labs Bike Light", "Customer: Alex Morgan, 10001"],
+            [["Log in as standard_user.", "Inventory is displayed."], ["Add both products.", "Both actions change to Remove and cart badge displays 2."], ["Open cart and select Checkout.", "Both products appear in cart and Your Information opens."], ["Enter Alex, Morgan, and 10001; select Continue.", "Overview opens with both products."], ["Select Finish.", "The completion page and confirmation message are displayed."], ["Select Back Home.", "Inventory is displayed."], ["Open the menu and select Logout.", "The login page is displayed and the session ends."]],
+            "The user completes a multi-product purchase, returns home, and logs out.", "Verify cart cleanup and remain logged out."],
+          ["Navigate the application using keyboard only", "Accessibility", "P2 (High)", "Major", "Manual only", "Edge",
+            "Checks that login, inventory, cart, and checkout can be operated without a pointer.",
+            ["Open the login page; do not use a mouse or trackpad during the test."], ["Keyboard: Tab, Shift+Tab, Enter, Space, arrow keys as applicable"],
+            [["Tab through login controls and enter credentials.", "Focus is visible and reaches Username, Password, and Login in a usable order."], ["Submit login and navigate product controls with the keyboard.", "Product links, cart, and menu controls are reachable and operable with visible focus."], ["Navigate cart and checkout controls with the keyboard.", "Continue, Checkout, form fields, and primary actions are reachable and operable without a pointer."]],
+            "Core shopping and checkout flow is operable by keyboard with visible focus.", "Log out and record any inaccessible control."],
+          ["Verify product image alternative text", "Accessibility", "P2 (High)", "Major", "Manual only", "Edge",
+            "Checks that product images expose meaningful alternative text to assistive technology.",
+            ["Log in as standard_user and inspect all six inventory product images with accessibility tree or screen reader."], ["Product images: all six inventory items"],
+            [["Inspect the accessible name/alt text of each product image.", "Each image has meaningful product-identifying alternative text, or is correctly marked decorative when adjacent text makes it redundant."]],
+            "Product image alternatives communicate product identity without duplicate or missing labels.", "Record products with missing or inaccurate alternatives."],
+          ["Verify accessible labels for login and checkout fields", "Accessibility", "P2 (High)", "Major", "Manual only", "Edge",
+            "Checks that form fields have programmatic labels that identify their purpose.",
+            ["Inspect login page, then log in and open checkout Your Information."], ["Fields: Username, Password, First Name, Last Name, Postal Code"],
+            [["Inspect the accessible name for each login field.", "Username and Password fields expose labels matching their purpose."], ["Inspect the accessible name for each checkout field.", "First Name, Last Name, and Postal Code fields expose labels matching their purpose."]],
+            "All five fields have accessible, purpose-identifying labels.", "Record fields whose labels are absent or incorrect."],
+          ["Verify mobile layout at 375px", "Responsive", "P2 (High)", "Major", "Manual only", "Edge",
+            "Checks core shopping screens at the requested mobile viewport width.",
+            ["Use Chrome latest at a 375px viewport width and log in as standard_user."], ["Viewport width: 375px"],
+            [["Inspect inventory and product cards.", "Product names, prices, actions, and navigation are visible without unintended horizontal overflow."], ["Open cart and checkout.", "Cart contents, checkout fields, and primary actions remain visible and operable."]],
+            "Core pages remain usable at 375px width.", "Restore the viewport and record screenshots of layout defects."],
+          ["Verify tablet layout at 768px", "Responsive", "P2 (High)", "Major", "Manual only", "Edge",
+            "Checks core shopping screens at the requested tablet viewport width.",
+            ["Use Chrome latest at a 768px viewport width and log in as standard_user."], ["Viewport width: 768px"],
+            [["Inspect inventory and product cards.", "Product content and actions are visible without overlapping or clipping."], ["Open cart and checkout.", "Cart contents, fields, and primary actions remain visible and operable."]],
+            "Core pages remain usable at 768px width.", "Restore the viewport and record screenshots of layout defects."],
+          ["Verify desktop layout at 1366px", "Responsive", "P2 (High)", "Major", "Manual only", "Edge",
+            "Checks core shopping screens at the requested desktop viewport width.",
+            ["Use Chrome latest at a 1366px viewport width and log in as standard_user."], ["Viewport width: 1366px"],
+            [["Inspect inventory and product details.", "Product content, images, and actions are visible without unintended overlap or clipping."], ["Open cart and checkout.", "Cart contents, fields, totals, and primary actions remain visible and operable."]],
+            "Core pages remain usable at 1366px width.", "Restore the viewport and record screenshots of layout defects."],
+          ["Run critical shopping flow in supported browsers", "Compatibility", "P1 (Critical)", "Blocker", "Manual only", "Edge",
+            "Verifies the essential login-to-purchase flow in each requested current browser.",
+            ["Run independently using latest Chrome, latest Firefox, and latest Edge."], ["Account: standard_user / secret_sauce", "Product: Sauce Labs Backpack", "Customer: Alex Morgan, 10001"],
+            [["In the current browser, log in and add Sauce Labs Backpack.", "Login succeeds and the cart badge reflects one product."], ["Complete checkout with the supplied customer information and select Finish.", "Overview calculations display and the completion confirmation is shown."], ["Repeat both actions in the other two browsers.", "Each browser completes the same flow without browser-specific blocking errors; any differences are recorded with browser/version."]],
+            "The critical flow is usable in Chrome, Firefox, and Edge latest.", "Log out and reset application state in each browser."],
+        ]
+      }
+    ];
+
+    const esc = value => String(value).replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+
+    function render() {
+      const coverage = Object.fromEntries(modules.map(module => [module.code, { name: module.name, Positive: 0, Negative: 0, Boundary: 0, Edge: 0, Total: 0 }]));
+      let total = { Positive: 0, Negative: 0, Boundary: 0, Edge: 0, Total: 0 };
+      let caseMarkup = "";
+
+      for (const module of modules) {
+        const ids = {};
+        caseMarkup += `<section class="module" aria-labelledby="module-${module.code}"><h2 id="module-${module.code}">${esc(module.code)} — ${esc(module.name)}</h2>`;
+        const sortedCases = [...module.cases].sort((a, b) => Number(b[2].startsWith("P1")) - Number(a[2].startsWith("P1")));
+        for (const test of sortedCases) {
+          const [title, type, priority, severity, automation, category, description, preconditions, testData, steps, finalResult, postconditions] = test;
+          ids[module.code] = (ids[module.code] || 0) + 1;
+          const sequence = String(ids[module.code]).padStart(3, "0");
+          const caseId = `TC-${module.code}-${sequence}`;
+          const requirementId = `REQ-${module.code}-${String(ids[module.code]).padStart(2, "0")}`;
+          const row = coverage[module.code];
+          row[category] += 1;
+          row.Total += 1;
+          total[category] += 1;
+          total.Total += 1;
+          const fieldRows = [
+            ["Test Case ID", caseId],
+            ["Module / Feature", module.name],
+            ["Requirement ID", requirementId],
+            ["Test Type", type],
+            ["Priority", priority],
+            ["Severity if fails", severity],
+            ["Automation", automation]
+          ];
+          caseMarkup += `<article class="case"><h3>### ${esc(caseId)}: ${esc(title)}</h3>
+            <table class="field-table"><tbody>${fieldRows.map(([label, value]) => `<tr><th>${esc(label)}</th><td>${label === "Priority" ? `<span class="priority ${priority.startsWith("P1") ? "p1" : priority.startsWith("P2") ? "p2" : "p3"}">${esc(value)}</span>` : esc(value)}</td></tr>`).join("")}</tbody></table>
+            <p><strong>Description:</strong> ${esc(description)}</p>
+            <p><strong>Preconditions:</strong></p><ol>${preconditions.map(item => `<li>${esc(item)}</li>`).join("")}</ol>
+            <p><strong>Test Data:</strong></p><ul>${testData.map(item => `<li>${esc(item)}</li>`).join("")}</ul>
+            <h4>Test Steps:</h4><table><thead><tr><th>#</th><th>Action</th><th>Expected Result</th></tr></thead><tbody>${steps.map((step, index) => `<tr><td>${index + 1}</td><td>${esc(step[0])}</td><td>${esc(step[1])}</td></tr>`).join("")}</tbody></table>
+            <p><strong>Final Expected Result:</strong> ${esc(finalResult)}</p>
+            <p><strong>Postconditions:</strong> ${esc(postconditions)}</p>
+            <p><strong>Actual Result:</strong> <em>(to be filled during execution)</em></p>
+            <p><strong>Status:</strong> Not Run / Pass / Fail / Blocked / Skipped</p>
+            <p><strong>Executed By / Date:</strong> <em>(to be filled)</em></p>
+            <p><strong>Defect ID:</strong> <em>(if failed)</em></p></article>`;
+        }
+        caseMarkup += "</section>";
+      }
+
+      document.getElementById("coverage-rows").innerHTML = modules.map(module => {
+        const row = coverage[module.code];
+        return `<tr><td>${esc(module.code)} — ${esc(module.name)}</td><td>${row.Positive}</td><td>${row.Negative}</td><td>${row.Boundary}</td><td>${row.Edge}</td><td>${row.Total}</td></tr>`;
+      }).join("");
+      document.getElementById("coverage-total").innerHTML = `<tr><th>Total</th><th>${total.Positive}</th><th>${total.Negative}</th><th>${total.Boundary}</th><th>${total.Edge}</th><th>${total.Total}</th></tr>`;
+      document.getElementById("test-cases").innerHTML = caseMarkup;
+    }
+    render();
+  </script>
+</body>
+</html>

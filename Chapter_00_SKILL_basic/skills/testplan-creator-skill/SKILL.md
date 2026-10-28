@@ -43,20 +43,7 @@ Tools	11
 Risks and Mitigations	11
 Approvals	12
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Objective 
+Objective:
 The goal of this test plan is to ensure the quality, functionality, and reliability of the Restful Booker API hosted at https://restful-booker.herokuapp.com.
 
 The API is designed to handle booking requests for a fictional hotel booking system.
@@ -471,3 +458,7 @@ Team will send different types of documents for Client Approval like below:
 • Reports
 Testing will only continue to the next steps once these approvals are done
 	
+Output:
+- Should be in PDF or Docs, Html
+
+Security and Safety:
